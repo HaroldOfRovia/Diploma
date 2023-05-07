@@ -26,10 +26,14 @@ class Unit:
             arr.append(f'{task}')
         return f'{arr}, duration: {self.duration}, task in time: {self.task_in_time}'
 
-    def __copy__(self):
+    def clone(self):
+        """
+        Отличается от __copy__() тем, что не производит глубокого копирования. Сохраняет ссылки оригинальных задач.
+        :return: Поверхностную копию объекта.
+        """
         clone = []
         for task in self.queue:
-            clone.append(task.__copy__())
+            clone.append(task)
         return Unit(clone)
 
     def __contains__(self, task: Task):
@@ -42,7 +46,7 @@ class Unit:
         """
         :return: Новую особь с перемешанной очередью задач и обновленной статистикой.
         """
-        clone = self.__copy__()
+        clone = self.clone()
         random.shuffle(clone.queue)
         clone.set_statistics()
         return clone
@@ -78,16 +82,16 @@ class Unit:
         """
         if random.randint(0, 1) == 0:
             if not self.__contains__(parent1.queue[num]):
-                self.append(parent1.queue[num].__copy__())
+                self.append(parent1.queue[num])
             elif not self.__contains__(parent2.queue[num]):
-                self.append(parent2.queue[num].__copy__())
+                self.append(parent2.queue[num])
             else:
                 self.append(-1)
         else:
             if not self.__contains__(parent2.queue[num]):
-                self.append(parent2.queue[num].__copy__())
+                self.append(parent2.queue[num])
             elif not self.__contains__(parent1.queue[num]):
-                self.append(parent1.queue[num].__copy__())
+                self.append(parent1.queue[num])
             else:
                 self.append(-1)
 
@@ -100,7 +104,7 @@ class Unit:
         """
         for i in range(pos, parent.len):
             if not self.__contains__(parent.queue[i]):
-                self.queue[num] = parent.queue[i].__copy__()
+                self.queue[num] = parent.queue[i]
                 return i
 
     def discrete_recombination(self, second_p):
@@ -139,21 +143,21 @@ class Unit:
         2. Первая половина новой особи - начало одного из родителя.
         3. Вторая половина новой особи - недостающие задачи идущие в том же порядке, что и у другого родителя.
         :param second_p: Вторая особь.
-        :param cut: Перед данной особью будет сделан разрез.
+        :param cut: После данной особи будет сделан разрез.
         :return: Два потомка.
         """
         child1, child2 = Unit([]), Unit([])
         for i in range(0, cut):
-            child1.append(self.queue[i].__copy__())
-            child2.append(second_p.queue[i].__copy__())
+            child1.append(self.queue[i])
+            child2.append(second_p.queue[i])
 
         for j in range(0, second_p.len):
             if not child1.__contains__(second_p.queue[j]):
-                child1.append(second_p.queue[j].__copy__())
+                child1.append(second_p.queue[j])
 
         for j in range(0, self.len):
             if not child2.__contains__(self.queue[j]):
-                child2.append(self.queue[j].__copy__())
+                child2.append(self.queue[j])
 
         child1.set_statistics()
         child2.set_statistics()
