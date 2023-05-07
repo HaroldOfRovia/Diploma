@@ -42,6 +42,12 @@ class Unit:
                 return True
         return False
 
+    def __getitem__(self, item):
+        return self.queue[item]
+
+    def __setitem__(self, key, value):
+        self.queue[key] = value
+
     def shuffle(self):
         """
         :return: Новую особь с перемешанной очередью задач и обновленной статистикой.
@@ -66,10 +72,10 @@ class Unit:
         self.duration = 0
         self.task_in_time = 0
         for i in range(0, self.len):
-            if self.queue[i].start > self.duration:
-                self.duration += self.queue[i].start - self.duration
-            self.duration += self.queue[i].length
-            if self.duration <= self.queue[i].end:
+            if self[i].start > self.duration:
+                self.duration += self[i].start - self.duration
+            self.duration += self[i].length
+            if self.duration <= self[i].end:
                 self.task_in_time += 1
 
     def choose_gen(self, num, parent1, parent2):
@@ -81,17 +87,17 @@ class Unit:
         :param parent2: родитель 2
         """
         if random.randint(0, 1) == 0:
-            if not self.__contains__(parent1.queue[num]):
-                self.append(parent1.queue[num])
-            elif not self.__contains__(parent2.queue[num]):
-                self.append(parent2.queue[num])
+            if not self.__contains__(parent1[num]):
+                self.append(parent1[num])
+            elif not self.__contains__(parent2[num]):
+                self.append(parent2[num])
             else:
                 self.append(-1)
         else:
-            if not self.__contains__(parent2.queue[num]):
-                self.append(parent2.queue[num])
-            elif not self.__contains__(parent1.queue[num]):
-                self.append(parent1.queue[num])
+            if not self.__contains__(parent2[num]):
+                self.append(parent2[num])
+            elif not self.__contains__(parent1[num]):
+                self.append(parent1[num])
             else:
                 self.append(-1)
 
@@ -103,8 +109,8 @@ class Unit:
         :param parent: Родительская особь.
         """
         for i in range(pos, parent.len):
-            if not self.__contains__(parent.queue[i]):
-                self.queue[num] = parent.queue[i]
+            if not self.__contains__(parent[i]):
+                self[num] = parent[i]
                 return i
 
     def discrete_recombination(self, second_p):
@@ -126,9 +132,9 @@ class Unit:
             child2.choose_gen(i, self, second_p)
 
         for i in range(0, self.len):
-            if child1.queue[i] == -1:
+            if child1[i] == -1:
                 child1.set_free_task(i, 0, self)
-            if child2.queue[i] == -1:
+            if child2[i] == -1:
                 child2.set_free_task(i, 0, second_p)
 
         child1.set_statistics()
@@ -148,16 +154,16 @@ class Unit:
         """
         child1, child2 = Unit([]), Unit([])
         for i in range(0, cut):
-            child1.append(self.queue[i])
-            child2.append(second_p.queue[i])
+            child1.append(self[i])
+            child2.append(second_p[i])
 
         for j in range(0, second_p.len):
-            if not child1.__contains__(second_p.queue[j]):
-                child1.append(second_p.queue[j])
+            if not child1.__contains__(second_p[j]):
+                child1.append(second_p[j])
 
         for j in range(0, self.len):
-            if not child2.__contains__(self.queue[j]):
-                child2.append(self.queue[j])
+            if not child2.__contains__(self[j]):
+                child2.append(self[j])
 
         child1.set_statistics()
         child2.set_statistics()
@@ -185,7 +191,7 @@ class Unit:
         """
         cut1 = random.randint(1, self.len - 2)
         cut2 = random.randint(cut1 + 1, self.len - 1)
-        child1, child2 = Unit(self.queue[:cut1]), Unit(second_p.queue[:cut1])
+        child1, child2 = Unit(self[:cut1]), Unit(second_p[:cut1])
         pos1, pos2 = 0, 0
         for i in range(cut1, cut2):
             child1.append(-1)
@@ -215,22 +221,37 @@ class Unit:
             pos = random.randint(0, self.len - 1)  # Место второго гена для обмена
             while pos == gen:
                 pos = random.randint(0, self.len - 1)
-            tmp = self.queue[pos]
-            self.queue[pos] = self.queue[gen]
-            self.queue[gen] = tmp
+            tmp = self[pos]
+            self[pos] = self[gen]
+            self[gen] = tmp
             self.set_statistics()
             return True
 
-    def better(self, other):
+    def compare(self, other):
         """
         Сравнивает 2 особи сначала по количеству задач уложившихся в директивный срок (чем больше, тем лучше).
         Если количество задач равно, то сравнивает по времени выполнения (чем меньше, тем лучше).
         :param other: Вторая особь с которой будет происходить сравнение.
-        :return: Возвращает True, если текущая особь лучше, чем особь переданная в параметры.
+        :return: Возвращает 1, если лучше, чем вторая. 0, если одинаковые. -1, если хуже.
         """
         if self.task_in_time > other.task_in_time:
-            return True
-        if self.task_in_time == other.task_in_time:
+            return 1
+        elif self.task_in_time == other.task_in_time:
             if self.duration < other.duration:
-                return True
-        return False
+                return 1
+            elif self.duration == other.duration:
+                return 0
+        else:
+            return -1
+
+    def hamming_distance(self, other):
+        """
+        Реализует Хеммингово расстояние.
+        :param other: Вторая особь.
+        :return: Значение Хеммингово расстояния.
+        """
+        distance = 0
+        for i in range(0, self.len):
+            if self[i].id != other[i].id:
+                distance += 1
+        return distance
