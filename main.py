@@ -28,11 +28,7 @@ queue1 = Unit([a3, a0, a2, a1])
 queue2 = Unit([a2, a1, a0, a3])
 queue3 = Unit([a3, a2, a0, a1])
 
-gen = Classical(20, queue)
-print(gen)
-gen.elite_selection(gen.generation + gen.generation)
-# gen.generation = [queue0, queue1, queue2, queue3]
-# gen.truncation_selection([queue0, queue1, queue2, queue3, queue0, queue1, queue2, queue3])
-
-print(gen)
-# print(f'\n{gen.outcrossing(3)}')
+gen = Classical(100, queue)
+solved = False
+while not solved:
+    solved = gen.one_step(1, 2, 0.5, 1)
