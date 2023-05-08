@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 
 from baseLogic.Task import Task
@@ -20,13 +22,13 @@ class Unit:
         self.task_in_time = 0
         self.set_statistics()
 
-    def __str__(self):
+    def __str__(self) -> str:
         arr = []
         for task in self.queue:
             arr.append(f'{task}')
         return f'{arr}, duration: {self.duration}, task in time: {self.task_in_time}'
 
-    def clone(self):
+    def clone(self) -> Unit:
         """
         Отличается от __copy__() тем, что не производит глубокого копирования. Сохраняет ссылки оригинальных задач.
         :return: Поверхностную копию объекта.
@@ -36,19 +38,19 @@ class Unit:
             clone.append(task)
         return Unit(clone)
 
-    def __contains__(self, task: Task):
+    def __contains__(self, task: Task) -> bool:
         for item in self.queue:
             if task.__eq__(item):
                 return True
         return False
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int):
         return self.queue[item]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: int, value: Task) -> None:
         self.queue[key] = value
 
-    def shuffle(self):
+    def shuffle(self) -> Unit:
         """
         :return: Новую особь с перемешанной очередью задач и обновленной статистикой.
         """
@@ -57,7 +59,7 @@ class Unit:
         clone.set_statistics()
         return clone
 
-    def append(self, task):
+    def append(self, task) -> None:
         """
         Добавляет задачу в очередь. НЕ ПЕРЕСЧИТЫВАЕТ СТАТИСТИКУ!!!
         :param task: Задача
@@ -65,7 +67,7 @@ class Unit:
         self.queue.append(task)
         self.len += 1
 
-    def set_statistics(self):
+    def set_statistics(self) -> None:
         """
         Устанавливает актуальное время выполнения задачи и количество задач уложившихся в директивный срок.
         """
@@ -78,7 +80,7 @@ class Unit:
             if self.duration <= self[i].end:
                 self.task_in_time += 1
 
-    def choose_gen(self, num, parent1, parent2):
+    def choose_gen(self, num: int, parent1: Unit, parent2: Unit) -> None:
         """
         Добавляет в очередь задачу (ген) одного из родителя или -1,
         если обе задачи (гена) уже присутствуют в генах ребенка
@@ -101,7 +103,7 @@ class Unit:
             else:
                 self.append(-1)
 
-    def set_free_task(self, num, pos, parent):
+    def set_free_task(self, num: int, pos: int, parent: Unit) -> int:
         """
         Вставляет первую задачу из родительской особи, что не содержится в дочерней очереди в выбранной позиции.
         :param num: Место замены.
@@ -113,7 +115,7 @@ class Unit:
                 self[num] = parent[i]
                 return i
 
-    def discrete_recombination(self, second_p):
+    def discrete_recombination(self, second_p: Unit) -> list[Unit]:
         """
         Модифицированная дискретная рекомбинация.
         Скрещивает текущую особь с особью переданной в параметры.
@@ -141,7 +143,7 @@ class Unit:
         child2.set_statistics()
         return [child1, child2]
 
-    def order_single_point_crossover_with_cut(self, second_p, cut):
+    def order_single_point_crossover_with_cut(self, second_p: Unit, cut: int) -> list[Unit]:
         """
         Упорядочивающий одноточечный кроссинговер.
         Скрещивает текущую особь с особью переданной в параметры.
@@ -169,7 +171,7 @@ class Unit:
         child2.set_statistics()
         return [child1, child2]
 
-    def order_single_point_crossover(self, second_p):
+    def order_single_point_crossover(self, second_p: Unit) -> list[Unit]:
         """
         Упорядочивающий одноточечный кроссинговер. Место разреза задается случайно.
         Скрещивает текущую особь с особью переданной в параметры.
@@ -178,7 +180,7 @@ class Unit:
         """
         return self.order_single_point_crossover_with_cut(second_p, random.randint(1, self.len - 1))
 
-    def order_two_point_crossover(self, second_p):
+    def order_two_point_crossover(self, second_p: Unit) -> list[Unit]:
         """
         Упорядочивающий двухточечный кроссинговер. Место разреза задается случайно.
         Скрещивает текущую особь с особью переданной в параметры.
@@ -208,7 +210,7 @@ class Unit:
         child2.set_statistics()
         return [child1, child2]
 
-    def mutation(self, probability):
+    def mutation(self, probability: float) -> bool:
         """
         Мутация текущей особи. С вероятностью меняет 2 гена местами.
         :param probability: Шанс мутации, чем выше значение, тем выше шанс (0 <= n <= 1).
@@ -227,7 +229,7 @@ class Unit:
             self.set_statistics()
             return True
 
-    def compare(self, other):
+    def compare(self, other: Unit) -> int:
         """
         Сравнивает 2 особи сначала по количеству задач уложившихся в директивный срок (чем больше, тем лучше).
         Если количество задач равно, то сравнивает по времени выполнения (чем меньше, тем лучше).
@@ -244,7 +246,7 @@ class Unit:
         else:
             return -1
 
-    def hamming_distance(self, other):
+    def hamming_distance(self, other: Unit) -> int:
         """
         Реализует Хеммингово расстояние.
         :param other: Вторая особь.

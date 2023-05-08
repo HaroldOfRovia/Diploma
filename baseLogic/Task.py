@@ -1,9 +1,12 @@
+from __future__ import annotations
+
+
 class Task:
     """
     Класс описывающий 1 задачу
     """
 
-    def __init__(self, num, length, start, end):
+    def __init__(self, num: int, length: int, start: int, end: int):
         """
         :param num: порядковый номер задачи в оригинальном условии
         :param length: длительность выполнения
@@ -15,13 +18,13 @@ class Task:
         self.start = start
         self.end = end
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'{self.id}'
 
-    def __copy__(self):
+    def __copy__(self) -> Task:
         return Task(self.id, self.length, self.start, self.end)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Task) -> bool:
         if type(self) != type(other):
             return False
         if self.id != other.id:

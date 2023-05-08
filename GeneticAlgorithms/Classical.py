@@ -3,7 +3,12 @@ import random
 from baseLogic.Unit import Unit
 
 
-def sort(instances):
+def sort(instances: list[Unit]) -> list[Unit]:
+    """
+    Сортирует последовательность особей сначала по вовремя выполненным задачам, затем по времени выполнения.
+    :param instances: Массив особей.
+    :return: Отсортированный массив.
+    """
     arr = []
     while 0 < len(instances):
         best = instances[0]
@@ -22,7 +27,7 @@ class Classical:
     Описывает классический генетический алгоритм.
     """
 
-    def __init__(self, count, origin: Unit):
+    def __init__(self, count: int, origin: Unit):
         """
         :param count: Количество особей в поколении
         :param origin: Исходное расписание
@@ -41,7 +46,7 @@ class Classical:
         self.not_changed = 0
         self.best_unit = self[0]
 
-    def init_generation(self):
+    def init_generation(self) -> list[Unit]:
         """
         :return: Первое случайное поколение
         """
@@ -50,23 +55,23 @@ class Classical:
             arr.append(self.origin.shuffle())
         return arr
 
-    def __str__(self):
+    def __str__(self) -> str:
         string = ''
         for i in range(0, self.len):
             string += f'{self[i]}\n'
         return string
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: int):
         return self.generation[item]
 
-    def panmixia(self):
+    def panmixia(self) -> int:
         """
         Панмикися.
         :return: Случайно выбранный номер второго родителя.
         """
         return random.randint(0, self.len - 1)
 
-    def inbreeding(self, curr_index):
+    def inbreeding(self, curr_index: int) -> Unit:
         """
         Инбридинг.
         :param curr_index:
@@ -86,7 +91,7 @@ class Classical:
                 break
         return unit
 
-    def outcrossing(self, curr_index):
+    def outcrossing(self, curr_index: int) -> Unit:
         """
         Аутбридинг.
         :param curr_index:
@@ -106,7 +111,7 @@ class Classical:
                 break
         return unit
 
-    def truncation_selection(self, instances):
+    def truncation_selection(self, instances: list[Unit]):
         """
         Отбор усечением. Сортирует набор особей (родители и потомки) по пригодности.
         Устанавливает новое поколение
@@ -114,7 +119,7 @@ class Classical:
         """
         self.generation = sort(instances)[:self.len]
 
-    def elite_selection(self, instances):
+    def elite_selection(self, instances: list[Unit]):
         """
         Элитарный отбор. 10% - лучшие особи, остальные 90% - случайные новые особи.
         Устанавливает новое поколение
@@ -128,7 +133,7 @@ class Classical:
         new_generation = sort(new_generation)
         self.generation = new_generation
 
-    def exclusion_selection(self, instances):
+    def exclusion_selection(self, instances: list[Unit]):
         """
         Отбор вытеснением. Сначала выбираются уникальные особи в порядке пригодности, затем оставшиеся лучшие.
         Устанавливает новое поколение.
@@ -155,7 +160,7 @@ class Classical:
             new_generation += instances[:self.len - len(new_generation)]
         self.generation = new_generation
 
-    def solved(self, count=100):
+    def solved(self, count=100) -> bool:
         """
         Проверяет, решен ли алгоритм.
         :param count: Количество поколений. Если за данное количество не будет найдена более хорошая особь,
@@ -172,7 +177,7 @@ class Classical:
             self.best_unit = new_best
             return False
 
-    def one_step(self, parent_selection_type, crossover_type, mutation, selection_type):
+    def one_step(self, parent_selection_type=1, crossover_type=1, mutation=0.5, selection_type=1) -> bool:
         """
         Один шаг генетического алгоритма.
         :param parent_selection_type: Тип отбора родителей.
