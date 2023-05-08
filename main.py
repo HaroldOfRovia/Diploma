@@ -29,6 +29,11 @@ queue2 = Unit([a2, a1, a0, a3])
 queue3 = Unit([a3, a2, a0, a1])
 
 gen = Classical(100, queue)
+# gen.one_step(1, 2, 0.5, 1)
+# gen.one_step(1, 2, 0.5, 1)
+# gen.one_step(1, 2, 0.5, 1)
+print('a')
 solved = False
 while not solved:
-    solved = gen.one_step(1, 2, 0.5, 1)
+    solved = gen.one_step(1, 2, 0.5, 2)
+

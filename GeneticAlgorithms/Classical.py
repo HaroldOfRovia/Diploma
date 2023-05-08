@@ -5,11 +5,14 @@ from baseLogic.Unit import Unit
 
 def sort(instances):
     arr = []
-    for i in range(0, len(instances)):
+    while 0 < len(instances):
         best = instances[0]
+        index = 0
         for j in range(0, len(instances)):
             if instances[j].compare(best) == 1:
                 best = instances[j]
+                index = j
+        instances.pop(index)
         arr.append(best)
     return arr
 
@@ -30,12 +33,13 @@ class Classical:
         Текущее поколение.
         """
         self.generation = self.init_generation()
+        self.generation = sort(self.generation)
         """
         Номер поколения.
         """
         self.generation_number = 0
         self.not_changed = 0
-        self.best_unit = self.best_count()
+        self.best_unit = self[0]
 
     def init_generation(self):
         """
@@ -60,7 +64,7 @@ class Classical:
         Панмикися.
         :return: Случайно выбранный номер второго родителя.
         """
-        return self[random.randint(0, self.len - 1)]
+        return random.randint(0, self.len - 1)
 
     def inbreeding(self, curr_index):
         """
@@ -102,44 +106,13 @@ class Classical:
                 break
         return unit
 
-    @staticmethod
-    def truncation_selection_with_count(instances, count):
-        """
-        Отбор усечением. Сортирует набор особей (родители и потомки) по пригодности.
-        :param instances: Набор особей состоящий из родителей и потомков.
-        :param count: Размер возвращаемого поколения.
-        :return: Новое поколение лучших особей.
-        """
-        new_generation = []
-        while len(new_generation) < count:
-            tmp = []
-            best = instances[0]
-            for item in instances:
-                result = best.compare(item)
-                if result == 1:
-                    continue
-                elif result == 0:
-                    tmp.append(item)
-                else:
-                    best = item
-                    tmp.clear()
-                    tmp.append(best)
-            new_generation += tmp[:count - len(new_generation)]
-            i = 0
-            while i < len(instances):
-                if best.compare(instances[i]) == 0:
-                    instances.pop(i)
-                    i -= 1
-                i += 1
-        return new_generation
-
     def truncation_selection(self, instances):
         """
-        Отбор усечением.
+        Отбор усечением. Сортирует набор особей (родители и потомки) по пригодности.
         Устанавливает новое поколение
-        :param instances: Набор особей состоящий из родителей и потомков.
+        :param instances: Набор особей состоящий из родителей и потомков.я.
         """
-        self.generation = self.truncation_selection_with_count(instances, self.len)
+        self.generation = sort(instances)[:self.len]
 
     def elite_selection(self, instances):
         """
@@ -149,16 +122,18 @@ class Classical:
         :return: Новое поколение.
         """
         cut = round(0.1 * self.len)
-        new_generation = self.truncation_selection_with_count(instances, cut)
+        new_generation = sort(instances)[:cut]
         for i in range(cut, self.len):
             new_generation.append(self.origin.shuffle())
+        new_generation = sort(new_generation)
         self.generation = new_generation
 
     def exclusion_selection(self, instances):
         """
-        Отбор вытеснением. Сначала выбираются уникальные особи, затем лучшие.
+        Отбор вытеснением. Сначала выбираются уникальные особи в порядке пригодности, затем оставшиеся лучшие.
         Устанавливает новое поколение.
         """
+        instances = sort(instances)
         new_generation = [instances.pop(0)]
         for distance in range(instances[0].len, 0, -1):  # Перебор всех расстояний, от максимального, до минимума.
             i = 0
@@ -177,18 +152,8 @@ class Classical:
             if len(new_generation) == self.len:
                 break
         if len(new_generation) != self.len:
-            new_generation += self.truncation_selection_with_count(instances, self.len - len(new_generation))
+            new_generation += instances[:self.len - len(new_generation)]
         self.generation = new_generation
-
-    def best_count(self):
-        """
-        :return: Лучшая особь в поколении
-        """
-        best = self[0]
-        for i in range(1, self.len):
-            if self[i].compare(best):
-                best = self[i]
-        return best
 
     def solved(self, count=100):
         """
@@ -197,7 +162,7 @@ class Classical:
         то алгоритм завершен.
         :return: True, если решение завершено.
         """
-        new_best = self.best_count()
+        new_best = self[0]
         if new_best.compare(self.best_unit) == 0:
             self.not_changed += 1
             if self.not_changed == count:
@@ -228,7 +193,10 @@ class Classical:
         new_generation = [] + self.generation
         for i in range(0, self.len):
             if parent_selection_type == 1:
-                second_p = self.panmixia()
+                second_p_num = self.panmixia()
+                if second_p_num == i:
+                    continue
+                second_p = self[second_p_num]
             elif parent_selection_type == 2:
                 second_p = self.inbreeding(i)
             else:
@@ -241,8 +209,8 @@ class Classical:
             else:
                 children = self[i].order_two_point_crossover(second_p)
 
-            children[0].mutation(mutation)
-            children[1].mutation(mutation)
+            for j in range(0, len(children)):
+                children[j].mutation(mutation)
             new_generation += children
 
         if selection_type == 1:
@@ -256,5 +224,5 @@ class Classical:
 
         if self.solved(1000):
             return True
-        print(f'{self.generation_number} {self.best_unit}')
+        print(f'Поколение {self.generation_number}: {self.best_unit}')
         return False
