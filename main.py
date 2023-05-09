@@ -1,6 +1,7 @@
 import random
 
 from GeneticAlgorithms.Classical import Classical
+from GeneticAlgorithms.IslandModel import IslandModel
 from baseLogic.Task import Task
 from baseLogic.Unit import Unit
 a0 = Task(0, 15, 0, 30)
@@ -28,12 +29,13 @@ queue1 = Unit([a3, a0, a2, a1])
 queue2 = Unit([a2, a1, a0, a3])
 queue3 = Unit([a3, a2, a0, a1])
 
-gen = Classical(100, queue)
+gen = IslandModel(100, 10, 3, queue, True)
+gen.solve()
 # gen.one_step(1, 2, 0.5, 1)
 # gen.one_step(1, 2, 0.5, 1)
 # gen.one_step(1, 2, 0.5, 1)
-print('a')
-solved = False
-while not solved:
-    solved = gen.one_step(1, 2, 0.5, 2)
+
+# solved = False
+# while not solved:
+#     solved = gen.one_step(1, 2, 0.5, 2)
 

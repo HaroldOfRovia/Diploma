@@ -27,13 +27,31 @@ class Classical:
     Описывает классический генетический алгоритм.
     """
 
-    def __init__(self, count: int, origin: Unit):
+    def __init__(self, count: int, origin: Unit,
+                 parent_selection_type=1, crossover_type=2, mutation=0.5, selection_type=1):
         """
         :param count: Количество особей в поколении
         :param origin: Исходное расписание
+        :param parent_selection_type: Тип отбора родителей.
+        1 - Панмиксия.
+        2 - Инбридинг.
+        3 - Аутбридинг.
+        :param crossover_type: Тип скрещивания особей.
+        1 - Дискретная рекомбинация.
+        2 - Упорядочивающий одноточечный кроссинговер.
+        3 - Упорядочивающий двухточечный кроссинговер.
+        :param mutation: Шанс мутации потомка от 0 до 1
+        :param selection_type: Тип отбора особей в новое поколение.
+        1 - Отбор усечением.
+        2 - Элитарный отбор.
+        3 - Отбор вытеснением.
         """
         self.origin = origin
         self.len = count
+        self.parent_selection_type = parent_selection_type
+        self.crossover_type = crossover_type
+        self.mutation = mutation
+        self.selection_type = selection_type
         """
         Текущее поколение.
         """
@@ -42,7 +60,7 @@ class Classical:
         """
         Номер поколения.
         """
-        self.generation_number = 0
+        self.generation_number = 1
         self.not_changed = 0
         self.best_unit = self[0]
 
@@ -63,6 +81,17 @@ class Classical:
 
     def __getitem__(self, item: int):
         return self.generation[item]
+
+    def update_stat(self):
+        if self.best_unit.compare(self[0]) != 0:
+            self.best_unit = self[0]
+            self.not_changed = 0
+
+    def sort(self):
+        """
+        Сортирует текущее поколение.
+        """
+        self.generation = sort(self.generation)
 
     def panmixia(self) -> int:
         """
@@ -130,8 +159,7 @@ class Classical:
         new_generation = sort(instances)[:cut]
         for i in range(cut, self.len):
             new_generation.append(self.origin.shuffle())
-        new_generation = sort(new_generation)
-        self.generation = new_generation
+        self.generation = sort(new_generation)
 
     def exclusion_selection(self, instances: list[Unit]):
         """
@@ -154,11 +182,11 @@ class Classical:
                     if len(new_generation) == self.len:
                         break
                 i += 1
-            if len(new_generation) == self.len:
+            if len(new_generation) >= self.len:
                 break
         if len(new_generation) != self.len:
             new_generation += instances[:self.len - len(new_generation)]
-        self.generation = new_generation
+        self.generation = new_generation[:self.len]
 
     def solved(self, count=100) -> bool:
         """
@@ -170,57 +198,44 @@ class Classical:
         new_best = self[0]
         if new_best.compare(self.best_unit) == 0:
             self.not_changed += 1
-            if self.not_changed == count:
+            if self.not_changed >= count:
                 return True
         else:
             self.not_changed = 0
             self.best_unit = new_best
             return False
 
-    def one_step(self, parent_selection_type=1, crossover_type=1, mutation=0.5, selection_type=1) -> bool:
+    def one_step(self) -> bool:
         """
         Один шаг генетического алгоритма.
-        :param parent_selection_type: Тип отбора родителей.
-        1 - Панмиксия.
-        2 - Инбридинг.
-        3 - Аутбридинг.
-        :param crossover_type: Тип скрещивания особей.
-        1 - Дискретная рекомбинация.
-        2 - Упорядочивающий одноточечный кроссинговер.
-        3 - Упорядочивающий двухточечный кроссинговер.
-        :param mutation: Шанс мутации потомка от 0 до 1
-        :param selection_type: Тип отбора особей в новое поколение.
-        1 - Отбор усечением.
-        2 - Элитарный отбор.
-        3 - Отбор вытеснением.
         :return: True, если алгоритм завершил работу.
         """
         new_generation = [] + self.generation
         for i in range(0, self.len):
-            if parent_selection_type == 1:
+            if self.parent_selection_type == 1:
                 second_p_num = self.panmixia()
                 if second_p_num == i:
                     continue
                 second_p = self[second_p_num]
-            elif parent_selection_type == 2:
+            elif self.parent_selection_type == 2:
                 second_p = self.inbreeding(i)
             else:
                 second_p = self.outcrossing(i)
 
-            if crossover_type == 1:
+            if self.crossover_type == 1:
                 children = self[i].discrete_recombination(second_p)
-            elif crossover_type == 2:
+            elif self.crossover_type == 2:
                 children = self[i].order_single_point_crossover(second_p)
             else:
                 children = self[i].order_two_point_crossover(second_p)
 
             for j in range(0, len(children)):
-                children[j].mutation(mutation)
+                children[j].mutation(self.mutation)
             new_generation += children
 
-        if selection_type == 1:
+        if self.selection_type == 1:
             self.truncation_selection(new_generation)
-        elif selection_type == 2:
+        elif self.selection_type == 2:
             self.elite_selection(new_generation)
         else:
             self.exclusion_selection(new_generation)
@@ -229,5 +244,14 @@ class Classical:
 
         if self.solved(1000):
             return True
-        print(f'Поколение {self.generation_number}: {self.best_unit}')
         return False
+
+    def solve(self):
+        """
+        Полностью решает генетический алгоритм.
+        """
+        solved = False
+        print(f'Поколение {self.generation_number}: {self.best_unit}')
+        while not solved:
+            solved = self.one_step()
+            print(f'Поколение {self.generation_number}: {self.best_unit}')
