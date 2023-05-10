@@ -107,13 +107,10 @@ class IslandModel:
             for j in range(0, cut):
                 tmp.append(self[i].generation.pop(0))
             tmp_best.append(tmp)
-        for i in range(1, self.island_count):
+        for i in range(0, self.island_count):
             self[i].generation += tmp_best[i - 1]
             self[i].sort()
             self[i].update_stat()
-        self[0].generation += tmp_best[-1]
-        self[0].sort()
-        self[0].update_stat()
 
     def solve(self):
         """
