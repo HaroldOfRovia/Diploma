@@ -1,7 +1,7 @@
 import math
 import random
 
-from GeneticAlgorithms.Classical import Classical
+from geneticAlgorithms.Classical import Classical
 from baseLogic.Unit import Unit
 
 
@@ -76,10 +76,10 @@ class IslandModel:
         """
         :return: Лучшая особь среди всех островов.
         """
-        best = self[0][0]
+        best = self[0].best_unit
         for i in range(0, self.island_count):
-            if self[i][0].compare(best):
-                best = self[i][0]
+            if self[i].best_unit.compare(best):
+                best = self[0].best_unit
         return best
 
     def one_step(self):
@@ -92,8 +92,11 @@ class IslandModel:
         for i in range(0, self.island_count):
             if not self[i].one_step():
                 solved = False
+        best = self.find_best()
         if self.generation_number % self.exchange_step == 0 and self.generation_number != 0:
             self.exchange()
+        best = self.find_best()
+        self.best_unit = self.find_best()
         return solved
 
     def exchange(self):
@@ -118,6 +121,16 @@ class IslandModel:
         """
         solved = False
         print(self.get_cur_population())
+        log = f'ISLAND_MODEL; ISLAND_COUNT: {self.island_count}; ISLAND_POPULATION: {self.island_population}; ' \
+              f'EXCHANGE_CHANGE: {self.exchange_step}; RANDOM: {self.random_param}; ' \
+              f'PARENT_SELECTION_TYPE: {self.parent_selection_type}; CROSSOVER_TYPE: {self.crossover_type}; ' \
+              f'MUTATION: {self.mutation}; SELECTION_TYPE: {self.selection_type}\n' \
+              f'QUEUE NUMBER DURATION/TASK_IN_TIME\n'
+        log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
+               f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
         while not solved:
             solved = self.one_step()
             print(self.get_cur_population())
+            log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
+                   f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
+        return log

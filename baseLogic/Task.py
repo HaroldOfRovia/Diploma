@@ -36,3 +36,6 @@ class Task:
         if self.length != other.length:
             return False
         return True
+
+    def get_full_data_str(self):
+        return f'{self.id} {self.start} {self.length} {self.end}\n'

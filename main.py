@@ -1,10 +1,12 @@
 import random
 
-from GeneticAlgorithms.Cellular import Cellular
-from GeneticAlgorithms.Classical import Classical
-from GeneticAlgorithms.IslandModel import IslandModel
+from geneticAlgorithms.Cellular import Cellular
+from geneticAlgorithms.Classical import Classical
+from geneticAlgorithms.IslandModel import IslandModel
 from baseLogic.Task import Task
 from baseLogic.Unit import Unit
+from qualityOfLife.TaskHelper import TaskHelper
+
 a0 = Task(0, 15, 0, 30)
 a1 = Task(1, 10, 15, 25)
 a2 = Task(2, 5, 0, 30)
@@ -25,15 +27,21 @@ queue = Unit([a0,
 #               Task(3, 15, 0, 50),
 #               Task(4, 20, 80, 100)])
 # queue.__contains__(a)
-queue0 = Unit([a3, a0, a1, a2])
-queue1 = Unit([a3, a0, a2, a1])
-queue2 = Unit([a2, a1, a0, a3])
-queue3 = Unit([a3, a2, a0, a1])
+# queue0 = Unit([a3, a0, a1, a2])
+# queue1 = Unit([a3, a0, a2, a1])
+# queue2 = Unit([a2, a1, a0, a3])
+# queue3 = Unit([a3, a2, a0, a1])
+#
+# gen = Cellular(100, queue)
+# gen.solve()
 
-gen = Cellular(100, queue)
-gen.solve()
-
-print("a")
+helper = TaskHelper()
+print(helper.generate_unit(10, 100, 25, 20))
+task = helper.read_task('./tasksFiles/saves/text.txt')
+task = IslandModel(20, 3, 3, task)
+helper.save_log(task.solve())
+# print(helper.last_read_unit)
+print('a')
 # gen.one_step(1, 2, 0.5, 1)
 # gen.one_step(1, 2, 0.5, 1)
 # gen.one_step(1, 2, 0.5, 1)

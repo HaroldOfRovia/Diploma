@@ -252,6 +252,16 @@ class Classical:
         """
         solved = False
         print(f'Поколение {self.generation_number}: {self.best_unit}')
+        log = f'CLASSICAL; UNIT_COUNT: {self.len}; ' \
+              f'PARENT_SELECTION_TYPE: {self.parent_selection_type}; ' \
+              f'CROSSOVER_TYPE: {self.crossover_type}; ' \
+              f'MUTATION: {self.mutation}; SELECTION_TYPE: {self.selection_type}\n' \
+              f'QUEUE NUMBER DURATION/TASK_IN_TIME\n'
+        log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
+               f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
         while not solved:
             solved = self.one_step()
             print(f'Поколение {self.generation_number}: {self.best_unit}')
+            log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
+                   f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
+        return log

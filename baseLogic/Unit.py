@@ -257,3 +257,9 @@ class Unit:
             if self[i].id != other[i].id:
                 distance += 1
         return distance
+
+    def get_queue_string(self):
+        arr = []
+        for task in self.queue:
+            arr.append(f'{task}')
+        return f'{arr}'
