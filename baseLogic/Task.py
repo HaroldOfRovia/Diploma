@@ -25,7 +25,7 @@ class Task:
         return Task(self.id, self.length, self.start, self.end)
 
     def __eq__(self, other: Task) -> bool:
-        if type(self) != type(other):
+        if not isinstance(other, Task):
             return False
         if self.id != other.id:
             return False

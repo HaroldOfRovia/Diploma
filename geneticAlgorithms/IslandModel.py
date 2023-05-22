@@ -92,10 +92,8 @@ class IslandModel:
         for i in range(0, self.island_count):
             if not self[i].one_step():
                 solved = False
-        best = self.find_best()
         if self.generation_number % self.exchange_step == 0 and self.generation_number != 0:
             self.exchange()
-        best = self.find_best()
         self.best_unit = self.find_best()
         return solved
 
@@ -104,7 +102,7 @@ class IslandModel:
         Передает следующему острову 10% лучших хромосом
         """
         tmp_best = []
-        cut = math.floor(self.island_population * 0.1)
+        cut = math.ceil(self.island_population * 0.1)
         for i in range(0, self.island_count):
             tmp = []
             for j in range(0, cut):
@@ -133,4 +131,4 @@ class IslandModel:
             print(self.get_cur_population())
             log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
                    f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
-        return log
+        return [log, None]

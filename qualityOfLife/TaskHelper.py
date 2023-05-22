@@ -45,7 +45,7 @@ class TaskHelper:
         return self.last_generate_unit
 
     @staticmethod
-    def save_unit(unit: Unit):
+    def save_task(unit: Unit):
         """
         Сохраняет текущий юнит в файл.
         """

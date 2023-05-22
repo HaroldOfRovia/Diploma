@@ -107,7 +107,7 @@ class Classical:
         :return: Возвращает особь для скрещивания с самым маленьким Хемминговым расстоянием.
         Самая близкая особь.
         """
-        distance = self.len + 1
+        distance = self[curr_index].len + 1
         unit = Unit([])
         for i in range(0, self.len):
             if i == curr_index:
@@ -264,4 +264,4 @@ class Classical:
             print(f'Поколение {self.generation_number}: {self.best_unit}')
             log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
                    f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
-        return log
+        return [log, None]

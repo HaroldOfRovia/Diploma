@@ -68,6 +68,10 @@ class Cellular:
         return best
 
     def one_step(self):
+        """
+        (Выбирается лучший из детей)
+        :return:
+        """
         self.generation_number += 1
         tmp_field = []
         for i in range(0, self.size):
@@ -102,15 +106,23 @@ class Cellular:
         """
         solved = False
         print(f'Поколение {self.generation_number}: {self.best_unit}')
-        log = f'CELLULAR; UNIT_COUNT: {self.size*self.size}; CROSSOVER_TYPE: {self.crossover_type}; ' \
+        special_log = ''
+        standard_log = f'CELLULAR; UNIT_COUNT: {self.size * self.size}; CROSSOVER_TYPE: {self.crossover_type}; ' \
               f'MUTATION: {self.mutation}\n' \
               f'QUEUE NUMBER DURATION/TASK_IN_TIME\n'
-        log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
+        standard_log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
                f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
         while not solved:
             solved = self.one_step()
             print(f'Поколение {self.generation_number}: {self.best_unit}')
-            log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
+            standard_log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
                    f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
-        return log
+            for i in range(0, self.size):
+                for j in range(0, self.size):
+                    special_log += f'{self[i][j].task_in_time}'
+                    if i != self.size - 1 or j != self.size - 1:
+                        special_log += ' '
+            special_log += '\n'
+
+        return [standard_log, special_log]
 
