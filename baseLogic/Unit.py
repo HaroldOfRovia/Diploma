@@ -70,12 +70,18 @@ class Unit:
     def set_statistics(self) -> None:
         """
         Устанавливает актуальное время выполнения задачи и количество задач уложившихся в директивный срок.
+        Начало решения задач с 0 у.е.
+        Пример:
+        0 0 10 10
+        1 13 5 20
+        2 18 7 25
+        Конец в
         """
         self.duration = 0
         self.task_in_time = 0
         for i in range(0, self.len):
             if self[i].start > self.duration:
-                self.duration += self[i].start - self.duration
+                self.duration = self[i].start
             self.duration += self[i].length
             if self.duration <= self[i].end:
                 self.task_in_time += 1
@@ -83,23 +89,19 @@ class Unit:
     def choose_gen(self, num: int, parent1: Unit, parent2: Unit) -> None:
         """
         Добавляет в очередь задачу (ген) одного из родителя или -1,
-        если обе задачи (гена) уже присутствуют в генах ребенка
-        :param num: номер гена
+        если ген уже присутствуют в гене родителе.
+        :param num: Номер гена
         :param parent1: родитель 1
         :param parent2: родитель 2
         """
         if random.randint(0, 1) == 0:
             if not self.__contains__(parent1[num]):
                 self.append(parent1[num])
-            elif not self.__contains__(parent2[num]):
-                self.append(parent2[num])
             else:
                 self.append(-1)
         else:
             if not self.__contains__(parent2[num]):
                 self.append(parent2[num])
-            elif not self.__contains__(parent1[num]):
-                self.append(parent1[num])
             else:
                 self.append(-1)
 
@@ -212,20 +214,49 @@ class Unit:
 
     def mutation(self, probability: float) -> bool:
         """
-        Мутация текущей особи. С вероятностью меняет 2 гена местами.
+        Мутация текущей особи. С вероятностью передвигает ген в случайную позицию.
         :param probability: Шанс мутации, чем выше значение, тем выше шанс (0 <= n <= 1).
         :return: Произошла ли мутация или нет.
         """
+        # if random.random() > probability:
+        #     return False
+        # else:
+        #     gen = random.randint(0, self.len - 1)  # Ген для перемещения
+        #     pos = random.randint(0, self.len - 1)  # Место второго гена для обмена
+        #     while pos == gen:
+        #         pos = random.randint(0, self.len - 1)
+        #     tmp = self[pos]
+        #     self[pos] = self[gen]
+        #     self[gen] = tmp
+        #     self.set_statistics()
+        #     return True
         if random.random() > probability:
             return False
         else:
             gen = random.randint(0, self.len - 1)  # Ген для перемещения
-            pos = random.randint(0, self.len - 1)  # Место второго гена для обмена
+            pos = random.randint(0, self.len - 1)  # Место для вставки
             while pos == gen:
                 pos = random.randint(0, self.len - 1)
-            tmp = self[pos]
-            self[pos] = self[gen]
-            self[gen] = tmp
+            tmp = []
+            i = 0
+            if gen > pos:
+                while i < self.len:
+                    if pos == i:
+                        tmp.append(self[gen])
+                    elif gen == i:
+                        i += 1
+                        continue
+                    tmp.append(self[i])
+                    i += 1
+            else:
+                while i < self.len:
+                    if gen == i:
+                        i += 1
+                    tmp.append(self[i])
+                    if pos == i:
+                        tmp.append(self[gen])
+                    i += 1
+            self.queue = tmp
             self.set_statistics()
             return True
 

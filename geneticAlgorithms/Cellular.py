@@ -1,4 +1,5 @@
 import math
+from datetime import datetime
 
 from baseLogic.Unit import Unit
 
@@ -87,9 +88,11 @@ class Cellular:
                     children += self[i][j].order_two_point_crossover(partner)
                 for k in range(0, len(children)):
                     children[k].mutation(self.mutation)
-                best_c = children[1]
-                if children[0].compare(best_c) == 1:
-                    best_c = children[0]
+                best_c = children[0]
+                children.append(self[i][j])
+                for k in range(1, 3):
+                    if children[k].compare(best_c) == 1:
+                        best_c = children[k]
                 if best_c.compare(self.best_unit) == 1:
                     self.best_unit = best_c
                     self.not_changed = 0
@@ -104,6 +107,7 @@ class Cellular:
         """
         Полностью решает генетический алгоритм.
         """
+        time = datetime.now()
         solved = False
         print(f'Поколение {self.generation_number}: {self.best_unit}')
         special_log = ''
@@ -124,5 +128,6 @@ class Cellular:
                         special_log += ' '
             special_log += '\n'
 
+        print(datetime.now() - time)
         return [standard_log, special_log]
 

@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import matplotlib.pyplot as plt
 from os import path
 
 from baseLogic.Task import Task
@@ -24,6 +25,8 @@ class TaskHelper:
             os.mkdir('./tasksFiles/saves')
         if not path.exists('./tasksFiles/logs'):
             os.mkdir('./tasksFiles/logs')
+        if not path.exists('./tasksFiles/graphs'):
+            os.mkdir('./tasksFiles/graphs')
         self.last_generate_unit = None
         self.last_read_unit = None
 
@@ -32,15 +35,37 @@ class TaskHelper:
         Генерирует случайное расписание случайных задач
         :param count: количество задач
         :param start_period: диапазон начала задач
-        :param max_duration: максимальное время исполнения
+        :param max_duration: максимальное время исполнения всех задач
         :param max_overtime: максимальное дополнительное время для выполнения задачи
         :return:
         """
         arr = []
         for i in range(0, count):
             start = random.randint(0, start_period)
-            duration = random.randint(0, max_duration)
+            duration = random.randint(1, max_duration)
             arr.append(Task(i, duration, start, random.randint(start + duration, start + duration + max_overtime)))
+        self.last_generate_unit = Unit(arr)
+        return self.last_generate_unit
+
+    def generate_unit_solved(self, count: int, pause: int, max_duration: int, max_overtime: int):
+        """
+        Генерирует решаемое случайное расписание случайных задач
+        :param count: количество задач
+        :param pause: максимальное время за которое начнется следующая задача
+        :param max_duration: максимальное время исполнения 1 задачи
+        :param max_overtime: максимальное дополнительное время для выполнения задачи
+        :return:
+        """
+        arr = []
+        timer = 0
+        for i in range(0, count):
+            start = random.randint(timer, timer + pause)
+            duration = random.randint(1, max_duration)
+            end = random.randint(start + duration, start + duration + max_overtime)
+            if timer < start and timer != 0:
+                timer = start
+            timer += duration
+            arr.append(Task(i, duration, start, end))
         self.last_generate_unit = Unit(arr)
         return self.last_generate_unit
 
@@ -94,3 +119,31 @@ class TaskHelper:
                 break
         text_file = open(f'./tasksFiles/logs/log{num}.txt', "w")
         text_file.write(log)
+
+    @staticmethod
+    def save_graph(log_url: str, graph_name=None):
+        name = graph_name
+        if graph_name is None:
+            num = ''
+            for i in range(0, sys.maxsize):
+                if i == 0:
+                    if not path.exists(f'./tasksFiles/graphs/graph.png'):
+                        break
+                elif not path.exists(f'./tasksFiles/graphs/graph({i}).png'):
+                    num += f'({i})'
+                    break
+            name = f'./tasksFiles/graphs/graph{num}.png'
+
+        arr = []
+        text_file = open(log_url, "r")
+        lines = text_file.readlines()
+        for i in range(2, len(lines) - 999):
+            string = lines[i]
+            string = string.split(" ")[-1]
+            string = string.split("/")[1]
+            arr.append(int(string))
+        plt.clf()
+        plt.plot(arr)
+        plt.xlabel('Номер поколения')
+        plt.ylabel('Задачи выполненные вовремя')
+        plt.savefig(name)

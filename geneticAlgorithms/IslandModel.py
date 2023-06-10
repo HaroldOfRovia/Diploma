@@ -1,5 +1,6 @@
 import math
 import random
+from datetime import datetime
 
 from geneticAlgorithms.Classical import Classical
 from baseLogic.Unit import Unit
@@ -44,6 +45,7 @@ class IslandModel:
         self.selection_type = selection_type
         self.islands = self.init_islands()
         self.generation_number = 1
+        self.not_changed = 1
         self.best_unit = self.find_best()
 
     def init_islands(self) -> list[Classical]:
@@ -78,8 +80,8 @@ class IslandModel:
         """
         best = self[0].best_unit
         for i in range(0, self.island_count):
-            if self[i].best_unit.compare(best):
-                best = self[0].best_unit
+            if self[i].best_unit.compare(best) == 1:
+                best = self[i].best_unit
         return best
 
     def one_step(self):
@@ -87,15 +89,20 @@ class IslandModel:
         Один шаг для всех островов.
         :return:
         """
-        solved = True
         self.generation_number += 1
         for i in range(0, self.island_count):
-            if not self[i].one_step():
-                solved = False
+            self[i].one_step()
         if self.generation_number % self.exchange_step == 0 and self.generation_number != 0:
             self.exchange()
-        self.best_unit = self.find_best()
-        return solved
+        local_best = self.find_best()
+        if self.best_unit.compare(local_best) == 0:
+            self.not_changed += 1
+        else:
+            self.not_changed = 0
+        self.best_unit = local_best
+        if self.not_changed >= 1000:
+            return True
+        return False
 
     def exchange(self):
         """
@@ -117,6 +124,7 @@ class IslandModel:
         """
         Полностью решает генетический алгоритм.
         """
+        time = datetime.now()
         solved = False
         print(self.get_cur_population())
         log = f'ISLAND_MODEL; ISLAND_COUNT: {self.island_count}; ISLAND_POPULATION: {self.island_population}; ' \
@@ -131,4 +139,5 @@ class IslandModel:
             print(self.get_cur_population())
             log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
                    f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
+        print(datetime.now() - time)
         return [log, None]

@@ -1,7 +1,8 @@
+import math
 import random
 
 from baseLogic.Unit import Unit
-
+from datetime import datetime
 
 def sort(instances: list[Unit]) -> list[Unit]:
     """
@@ -109,6 +110,7 @@ class Classical:
         """
         distance = self[curr_index].len + 1
         unit = Unit([])
+        arr = []
         for i in range(0, self.len):
             if i == curr_index:
                 continue
@@ -116,9 +118,12 @@ class Classical:
             if tmp < distance:
                 unit = self[i]
                 distance = tmp
+                arr = [unit]
+            elif tmp == distance:
+                arr.append(self[i])
             if distance == 0:
                 break
-        return unit
+        return arr.pop(random.randint(0, len(arr) - 1))
 
     def outcrossing(self, curr_index: int) -> Unit:
         """
@@ -129,6 +134,7 @@ class Classical:
         """
         distance = -1
         unit = Unit([])
+        arr = []
         for i in range(0, self.len):
             if i == curr_index:
                 continue
@@ -136,15 +142,18 @@ class Classical:
             if tmp > distance:
                 unit = self[i]
                 distance = tmp
+                arr = [unit]
+            elif tmp == distance:
+                arr.append(self[i])
             if distance == 0:
                 break
-        return unit
+        return arr.pop(random.randint(0, len(arr) - 1))
 
     def truncation_selection(self, instances: list[Unit]):
         """
         Отбор усечением. Сортирует набор особей (родители и потомки) по пригодности.
         Устанавливает новое поколение
-        :param instances: Набор особей состоящий из родителей и потомков.я.
+        :param instances: Набор особей состоящий из родителей и потомков.
         """
         self.generation = sort(instances)[:self.len]
 
@@ -155,7 +164,7 @@ class Classical:
         :param instances: Набор особей состоящий из родителей и потомков.
         :return: Новое поколение.
         """
-        cut = round(0.1 * self.len)
+        cut = math.ceil(0.1 * self.len)
         new_generation = sort(instances)[:cut]
         for i in range(cut, self.len):
             new_generation.append(self.origin.shuffle())
@@ -250,6 +259,7 @@ class Classical:
         """
         Полностью решает генетический алгоритм.
         """
+        time = datetime.now()
         solved = False
         print(f'Поколение {self.generation_number}: {self.best_unit}')
         log = f'CLASSICAL; UNIT_COUNT: {self.len}; ' \
@@ -264,4 +274,5 @@ class Classical:
             print(f'Поколение {self.generation_number}: {self.best_unit}')
             log += f'{self.best_unit.get_queue_string()} {self.generation_number} ' \
                    f'{self.best_unit.duration}/{self.best_unit.task_in_time}\n'
+        print(datetime.now() - time)
         return [log, None]
